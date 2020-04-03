@@ -16,12 +16,12 @@ import requests
 
 def bitbay():
     
-    data=requests.get('https://bitbay.net/API/Public/BTC/LTC/orderbook.json')
+    data=requests.get('https://bitbay.net/API/Public/BTC/USD/orderbook.json')
     return data.json()
 
 def bitbay_ticker():
     
-    data=requests.get('https://bitbay.net/API/Public/BTC/LTC/ticker.json')
+    data=requests.get('https://bitbay.net/API/Public/BTC/USD/ticker.json')
     return data.json()    
 def cex():
     

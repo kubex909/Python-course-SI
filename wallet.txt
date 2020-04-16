@@ -1,0 +1,26 @@
+Aktualny zarobek [USD]:
+35.994
+
+>> BitBay
+[BTC]
+0.44
+[USD]
+2953.042
+
+>> BitStamp
+[BTC]
+0.56
+[USD]
+2082.951
+
+>> BlockChain
+[BTC]
+0.5
+[USD]
+2500
+
+>> CoinBase
+[BTC]
+0.5
+[USD]
+2500

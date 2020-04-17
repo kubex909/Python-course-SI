@@ -1,26 +1,20 @@
-Aktualny zarobek [USD]:
-35.994
-
->> BitBay
-[BTC]
-0.44
-[USD]
-2953.042
-
->> BitStamp
-[BTC]
-0.56
-[USD]
-2082.951
-
->> BlockChain
-[BTC]
-0.5
-[USD]
-2500
-
->> CoinBase
-[BTC]
-0.5
-[USD]
-2500
+Zarobek USD: 
+43.365272000000004
+bitbay
+USD
+14333.42722
+BTC
+9.400000000000002
+Cex
+USD
+8621.6106
+BTC
+10.2bitstamp
+USD
+8545.020700000001
+BTC
+10.2blockchain
+USD
+8543.306752
+BTC
+10.2

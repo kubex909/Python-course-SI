@@ -1,26 +1,46 @@
 import time
 import requests
+import operator
+
+def create_table(tab):
+    data=[]
+    data2=[]
+    for i in range(len(tab)):
+        data_p=tab[:][i]['price']
+        data_t=tab[:][i]['type']
+        data_a=tab[:][i]['amount']
+        if data_t=="0":
+            data.append([float(data_p),float(data_a)])
+        else:
+            data2.append([float(data_p),float(data_a)])
+    data=bubbleSort(data,0)
+    return data,data2
 
 
 def bitbay():
-    BTC=requests.get('https://bitbay.net/API/Public/BTC/USD/ticker.json').json()
-    BTC_b=BTC['bid']
-    BTC=BTC['ask']
-    ZEC=requests.get('https://bitbay.net/API/Public/ZEC/USD/ticker.json').json()
-    ZEC_b=ZEC['bid']
-    ZEC=ZEC['ask']
-    ETH=requests.get('https://bitbay.net/API/Public/ETH/USD/ticker.json').json()
-    ETH_b=ETH['bid']
-    ETH=ETH['ask']
-    LTC=requests.get('https://bitbay.net/API/Public/LTC/USD/ticker.json').json()
-    LTC_b=LTC['bid']
-    LTC=LTC['ask']
-    DASH=requests.get('https://bitbay.net/API/Public/DASH/USD/ticker.json').json()
-    DASH_b=DASH['bid']
-    DASH=DASH['ask']
-    value=[BTC,ZEC,ETH,LTC,DASH]
-    value_bid=[BTC_b,ZEC_b,ETH_b,LTC_b,DASH_b]
-    return value,value_bid
+    url='https://www.bitstamp.net/api/v2/transactions/btcusd/'
+    data={'time':'day'}
+    BTC=requests.get(url, data= data).json()
+    BTC,BTC_s=create_table(BTC)
+
+    url='https://www.bitstamp.net/api/v2/transactions/eurusd/'
+    EURO=requests.get(url,data=data).json()
+    EURO,EURO_s=create_table(EURO)
+
+    url='https://www.bitstamp.net/api/v2/transactions/xrpusd/'
+    XRP=requests.get(url,data=data).json()
+    XRP,XRP_s=create_table(XRP)
+
+    url='https://www.bitstamp.net/api/v2/transactions/ltcusd/'
+    LT=requests.get(url,data=data).json()
+    LT,LT_s=create_table(LT)
+    url='https://www.bitstamp.net/api/v2/transactions/ethusd/'
+    ETH=requests.get(url,data=data).json()
+    ETH,ETH_s=create_table(ETH)
+
+    value=[BTC,EURO,XRP,LT,ETH]
+    value2=[BTC_s,EURO_s,XRP_s,LT_s,ETH_s]
+    return value,value2
 
 def bubbleSort(data,side):
     lenght=len(data)
@@ -44,10 +64,9 @@ def buy_sell():
     data,data2=bitbay()
     percent=[]
     for i in range(len(data)):
-        percent.append((data[i]-data2[i])/data[i])
-        
-    
-    dictionary={percent[0]:'BTC',percent[1]:'ZEC',percent[2]:'ETH',percent[3]:'LTC',percent[4]:'DASH'}
+        percent.append((data[i][-1][0]/data2[i][0][0])-1)
+            
+    dictionary={percent[0]:'BTC',percent[1]:'EUR',percent[2]:'XRP',percent[3]:'LTC',percent[4]:'ETH'}
     percent=bubbleSort(percent,1)
     
     for i in range(len(percent)):

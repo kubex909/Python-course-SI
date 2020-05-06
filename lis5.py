@@ -23,9 +23,9 @@ def bitbay():
     BTC=requests.get(url, data= data).json()
     BTC,BTC_s=create_table(BTC)
 
-    url='https://www.bitstamp.net/api/v2/transactions/eurusd/'
-    EURO=requests.get(url,data=data).json()
-    EURO,EURO_s=create_table(EURO)
+    url='https://www.bitstamp.net/api/v2/transactions/bchusd/'
+    BCH=requests.get(url,data=data).json()
+    BCH,BCH_s=create_table(BCH)
 
     url='https://www.bitstamp.net/api/v2/transactions/xrpusd/'
     XRP=requests.get(url,data=data).json()
@@ -38,8 +38,8 @@ def bitbay():
     ETH=requests.get(url,data=data).json()
     ETH,ETH_s=create_table(ETH)
 
-    value=[BTC,EURO,XRP,LT,ETH]
-    value2=[BTC_s,EURO_s,XRP_s,LT_s,ETH_s]
+    value=[BTC,BCH,XRP,LT,ETH]
+    value2=[BTC_s,BCH_s,XRP_s,LT_s,ETH_s]
     return value,value2
 
 def bubbleSort(data,side):
@@ -65,16 +65,62 @@ def buy_sell():
     percent=[]
     for i in range(len(data)):
         percent.append((data[i][-1][0]/data2[i][0][0])-1)
-            
-    dictionary={percent[0]:'BTC',percent[1]:'EUR',percent[2]:'XRP',percent[3]:'LTC',percent[4]:'ETH'}
+    return percent
+
+
+def buy_sell_sum(money):  
+    
+    data,data2=bitbay()
+    amount=[]
+    price=[]
+   
+    
+    for i in range(len(data)):
+        amount.append([0,0,0,0])
+        j=0
+        while amount[i][0]<money and j<len(data[i]) and j<len(data2[i]):
+            if  amount[i][0]+(data2[i][j][0]*data2[i][j][1])<money:
+                amount[i][0]+=data2[i][j][0]*data2[i][j][1]
+                amount[i][1]+=data2[i][j][1]
+            else:   
+                amount[i][1]+=(money-amount[i][0])/data2[i][j][0]
+                amount[i][0]=money
+            j+=1
+        price.append(amount[i][0]/amount[i][1])
+    
+
+    for i in range(len(data)):
+        j=-1
+        amount[i][3]=amount[i][1]
+        while amount[i][3]>0 and len(data2)+j>=0 and j+len(data)>=0:
+            if  (amount[i][3]-data[i][j][1])>0:
+                amount[i][2]+=data[i][j][0]*data[i][j][1]
+                amount[i][3]-=data[i][j][1]
+            else:   
+                amount[i][2]+=amount[i][3]*data[i][j][0]
+                amount[i][3]=0
+            j-=1
+        price[i]=round(((amount[i][2]/amount[i][1])/price[i]-1)*100,5)
+    return price
+
+def program(money):
+    percent=buy_sell()
+    percent2=buy_sell_sum(money)
+    dictionary={percent[0]:'BTC',percent[1]:'BCH',percent[2]:'XRP',percent[3]:'LTC',percent[4]:'ETH'}
     percent=bubbleSort(percent,1)
     
     for i in range(len(percent)):
-        print(dictionary[percent[i]], round(percent[i]*100,2),"%")
+        print(dictionary[percent[i]], round(percent[i]*100,5),"%")
+
+    dictionary2={percent2[0]:'BTC',percent2[1]:'BCH',percent2[2]:'XRP',percent2[3]:'LTC',percent2[4]:'ETH'}
+    percent2=bubbleSort(percent2,1)
+    print("value from second task with",money,"USD")
+    for i in range(len(percent)):
+        print(dictionary2[percent2[i]], percent2[i] ,"%")
     
 
-
 while True:
-    buy_sell()
+    money=1000
+    program(money)
     time.sleep(300)
     print("Refresh")

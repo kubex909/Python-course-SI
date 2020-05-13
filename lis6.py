@@ -16,38 +16,11 @@ def create_table(tab,mode):
 
         if data_t=="0":
             data.append([int(data_d),float(data_p),float(data_a)])
-        else:
-            data2.append([int(data_d),float(data_p),float(data_a)])
+
     data=bubbleSort(data,0)
-    data2=bubbleSort(data2,0)
-    return data,data2
 
+    return data
 
-def bitbay():
-    url='https://www.bitstamp.net/api/v2/transactions/btcusd/'
-    data={'time':'day'}
-    BTC=requests.get(url, data= data).json()
-    BTC,BTC_s=create_table(BTC,1)
-
-    url='https://www.bitstamp.net/api/v2/transactions/bchusd/'
-    BCH=requests.get(url,data=data).json()
-    BCH,BCH_s=create_table(BCH,1)
-
-    url='https://www.bitstamp.net/api/v2/transactions/xrpusd/'
-    XRP=requests.get(url,data=data).json()
-    XRP,XRP_s=create_table(XRP,1)
-
-    url='https://www.bitstamp.net/api/v2/transactions/ltcusd/'
-    LT=requests.get(url,data=data).json()
-    LT,LT_s=create_table(LT,1)
-    
-    url='https://www.bitstamp.net/api/v2/transactions/ethusd/'
-    ETH=requests.get(url,data=data).json()
-    ETH,ETH_s=create_table(ETH,1)
-
-    value=[BTC,BCH,XRP,LT,ETH]
-    value2=[BTC_s,BCH_s,XRP_s,LT_s,ETH_s]
-    return value,value2
 
 def bubbleSort(data,side):
     lenght=len(data)
@@ -67,68 +40,36 @@ def bubbleSort(data,side):
 
     return data
 
-def buy_sell():
-    data,data2=bitbay()
-    percent=[]
 
-    for i in range(len(data)):
-        percent.append((data[i][-1][1]/data2[i][0][1])-1)
-    return percent
-
-
-def buy_sell_sum(money):  
-    
-    data,data2=bitbay()
-    amount=[]
-    price=[]
-   
-    
-    for i in range(len(data)):
-        amount.append([0,0,0,0])
-        j=0
-        while amount[i][0]<money and j<len(data[i]) and j<len(data2[i]):
-            if  amount[i][0]+(data2[i][j][1]*data2[i][j][2])<money:
-                amount[i][0]+=data2[i][j][1]*data2[i][j][2]
-                amount[i][1]+=data2[i][j][2]
-            else:   
-                amount[i][1]+=(money-amount[i][0])/data2[i][j][1]
-                amount[i][0]=money
-            j+=1
-        price.append(amount[i][0]/amount[i][1])
-    
-
-    for i in range(len(data)):
-        j=-1
-        amount[i][3]=amount[i][1]
-        while amount[i][3]>0 and len(data2)+j>=0 and j+len(data)>=0:
-            if  (amount[i][3]-data[i][j][2])>0:
-                amount[i][2]+=data[i][j][1]*data[i][j][2]
-                amount[i][3]-=data[i][j][2]
-            else:   
-                amount[i][2]+=amount[i][3]*data[i][j][1]
-                amount[i][3]=0
-            j-=1
-        price[i]=round(((amount[i][2]/amount[i][1])/price[i]-1)*100,5)
-
-    return price
-
-def check_value():
+def check_value(mode):
 
     connection = sqlite3.connect('C:\git\Python-course-SI\cryptocurrency.db')
     cursor = connection.cursor()
     cursor.execute("SELECT Currency FROM wallet WHERE Amount>0")           
     currency=cursor.fetchall()
-    print(currency)
     cursor.close()
 
-
-    #currency=['BTC','ETH']
-    amount=[1,1]
     value=[]
+    sum_now=0
+    sum_past=0
+    print("Tak zmieniła się wartość twoich walut:")
     for i in range(len(currency)):
-        if amount[i]!=0:
-            value.append(check(currency[i][0]))
-    print(value)
+        transactions=check(currency[i][0])
+        if mode==0:
+            value.append(transactions[-1][1]-transactions[0][1])
+        else:
+            value.append(round(transactions[-1][1]/transactions[0][1]-1,4))
+        sum_now+=transactions[-1][1]
+        sum_past+=transactions[0][1]
+    for i in range(len(value)):
+        if mode==0:
+            print(currency[i][0],value[i])
+        else: 
+            print(currency[i][0],value[i],"%")
+    if mode ==0:
+        print("Sumarycznie twój portfel zmienił się o",sum_now-sum_past)
+    else:
+        print("Sumarycznie twój portfel zmienił się o",round(sum_now/sum_past-1,4),"%")
 
 def check(cur):
     switcher={
@@ -141,72 +82,78 @@ def check(cur):
     url=switcher.get(cur)
     data={'time':'day'}
     single_value=requests.get(url, data= data).json()
-    BTC,BTC_s=create_table(single_value,0)
-    BTC=BTC[-1][1]-BTC[0][1]
-
+    BTC=create_table(single_value,0)
     return BTC
 
-def program(money):
-    percent=buy_sell()
-    percent2=buy_sell_sum(money)
-    dictionary={percent[0]:'BTC',percent[1]:'BCH',percent[2]:'XRP',percent[3]:'LTC',percent[4]:'ETH'}
-    percent=bubbleSort(percent,1)
-    
-    for i in range(len(percent)):
-        print(dictionary[percent[i]], round(percent[i]*100,5),"%")
 
-    dictionary2={percent2[0]:'BTC',percent2[1]:'BCH',percent2[2]:'XRP',percent2[3]:'LTC',percent2[4]:'ETH'}
-    percent2=bubbleSort(percent2,1)
-    print("value from second task with",money,"USD")
-    for i in range(len(percent)):
-        print(dictionary2[percent2[i]], percent2[i] ,"%")
     
 def insert_data(mode):
-    print("dodaje baze")
     connection = sqlite3.connect('C:\git\Python-course-SI\cryptocurrency.db')
     cursor = connection.cursor()
-    command="""CREATE TABLE IF NOT EXISTS 
-    wallet(Currency TEXT PRIMARY KEY, Amount REAL NOT NULL ) """
-    cursor.execute(command)
-    # pojawia się nowy paramet encoding ustawiony na utf-8
+    cursor.execute("SELECT Currency FROM wallet")
+    #currency_list=cursor.fetchall()
+    select=cursor.fetchall()
+    currency_list=[]
+    for i in select:
+        currency_list.append(i[0])
+    print(currency_list)
+ 
     with open('C:/git/Python-course-SI/btc.csv', 'r', encoding='utf-8') as csvfile:
         csvreader = csv.DictReader(csvfile, delimiter=',')
+        erors=[]
         for row in csvreader :
-            if mode == 1:
-                cur=(row['Currency'])
-                cursor.execute("SELECT Amount FROM wallet WHERE Currency= ?", (cur,))
-                value=cursor.fetchone()[0]
-                value=value+float(row['Amount'])  
+            if row['Currency'] in currency_list:
+                if mode == 1:
+                    cur=(row['Currency'])
+                    cursor.execute("SELECT Amount FROM wallet WHERE Currency= ?", (cur,))
+                    value=cursor.fetchone()[0]
+                    value=value+float(row['Amount'])  
+                else:
+                    value=  row['Amount']      
+                data_tuple = (value,row['Currency'])
+                cursor.execute("UPDATE wallet SET Amount=? WHERE Currency=?", data_tuple)           
+                connection.commit()
             else:
-                value=  row['Amount']      
-            data_tuple = (value,row['Currency'])
-            cursor.execute("UPDATE wallet SET Amount=? WHERE Currency=?", data_tuple)           
-            connection.commit()
+                erors.append(row['Currency'])
+        if len(erors) >0:
+            print("Próbowałeś dodać walutę której nie ma w systemie:", erors)
 
     cursor.close()
 
+def print_data():
+    connection = sqlite3.connect('C:\git\Python-course-SI\cryptocurrency.db')
+    cursor = connection.cursor()
+    cursor.execute("SELECT Currency,Amount FROM wallet WHERE Amount>0")           
+    currency=cursor.fetchall()
+    cursor.close()
+    print("W bazie masz zapisane:")
+    for i in currency:
+        print("Waluta",i[0],"Ilość",i[1])
+
 def indirect(i):
-    if i==1:
-        money=int(input("Ile masz pieniedzy:"))
-        program(money)
+    if i=='1':
+        check_value(1)
     if i=='2':
-        insert_data(0)
+        check_value(0)   
     if i=='3':
-        insert_data(1)
+        insert_data(0)
     if i=='4':
-        check_value()
+        print_data()
     if i=='5':
+        insert_data(1)
+    if i=='6':
         print("End")
         sys.exit(0)
 
-run=True
-while run==True:
-    print("1- Sprawdź zysk")
-    print("2- Wprowadź nowe dane")
-    print("3- Wprowadź zmiany w danych")
-    print("4- Sprawdź wartość waluty")
-    print("4- Koniec")
-    x=input()
+
+while True:
+    print("1- Sprawdź zysk procentowy")
+    print("2- Sprawdź zysk liczbowy")
+    print("3- Wprowadź dane do bazy")
+    print("4- Wyświetl dane z bazy")
+    print("5- Aktualizuj dane")
+    print("6- Koniec")
+    x=input("Wybierz opcję: ")
     indirect(x)
     
 

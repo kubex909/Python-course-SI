@@ -1,9 +1,28 @@
 import random
 import requests
 from matplotlib.pyplot import *
+from datetime import datetime,timedelta
+
 def get_data():
-    data=[1,2,3,4,0,6,7,8,0]
-    return data
+    end = datetime.now().timestamp()
+    start_date=input("Put date in format: YYYY-MM-DD \n")
+    start= datetime.strptime(start_date, '%Y-%m-%d').timestamp()
+    period=86400
+    url="https://poloniex.com/public"
+    data={'command':'returnChartData',
+        'currencyPair':'BTC_XMR',
+    'start': start,
+    'end' : end,
+    'period':period
+    }
+    BTC=requests.get(url, params= data).json()
+    data=[]
+    time=[]
+    for i in BTC:
+        data.append(i['volume'])
+        time.append(i['date']) 
+    return data,time
+
 def analyse_data(data):
     lower=0
     min_diff_lower=max(data)-min(data)
@@ -33,22 +52,34 @@ def analyse_data(data):
         else: 
             new_data.append(new_data[i-1]+random.uniform(min_diff_up,max_diff_up))
     return new_data
-   # plot(data+new_data)
-    #show()
-#old_data=[1,3,5,6,3,2,6,7,8,9]
-time=[0,1,2,3,4,5,6,7,8]
-time2=[8,9,10,11,12,13,14,15,16,17]
-old_data=get_data()
+
+
+
+time=[]
+time2=[]
+old_data,times=get_data()
+
+#datetime.utcfromtimestamp(timedelta(days=1)).strftime('%Y-%m-%d')
+#datetime.utcfromtimestamp(times[i]).strftime('%Y-%m-%d')
+#time2.append(datetime.now)
+for i in range(len(times)):
+    time.append(datetime.utcfromtimestamp(times[i]).strftime('%m-%d'))
+time2.append(time[-1])
+for i in range(len(time)):
+    time2.append((datetime.now()+timedelta(days=i)).strftime('%m-%d'))
+#print(datetime.now())
+#print(datetime.now()+timedelta(days=1))
+
 average=[0]*(len(old_data)+1)
 for i in range(100):
+    print(i)
     new_data=analyse_data(old_data)
     for i in range(len(new_data)):
         average[i]+=new_data[i]
-    print(new_data)
-    print(average,"avg")
+    #print(new_data)
+    #print(average,"avg")
 for i in range(len(average)):
     average[i]=average[i]/100   
-print(average)
 plot(time,old_data,'b')
 plot(time2,average,'r')
 plot(time2,new_data,'g')

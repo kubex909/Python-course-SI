@@ -3,19 +3,19 @@ import requests
 from matplotlib.pyplot import *
 from datetime import datetime,timedelta
 
-def get_data():
+def get_data(start_date, currencypair):
     end = datetime.now().timestamp()
-    start_date=input("Put date in format: YYYY-MM-DD \n")
     start= datetime.strptime(start_date, '%Y-%m-%d').timestamp()
     period=86400
     url="https://poloniex.com/public"
     data={'command':'returnChartData',
-        'currencyPair':'BTC_XMR',
+        'currencyPair':currencypair,
     'start': start,
     'end' : end,
     'period':period
     }
     BTC=requests.get(url, params= data).json()
+    print(BTC)
     data=[]
     time=[]
     for i in BTC:
@@ -57,7 +57,18 @@ def analyse_data(data):
 
 time=[]
 time2=[]
-old_data,times=get_data()
+print("1 - BTC-DASH")
+print("2 - BTC-ETH")
+print("3 - USDC-ETH")
+idpair=input("Chose currency pair: ")
+switcher={
+    "1":"BTC_DASH",
+    "2":"BTC_ETH",
+    "3":"USDS_ETH",
+}
+pair=switcher.get(idpair)
+start_date=input("Put date in format: YYYY-MM-DD \n")
+old_data,times=get_data(start_date,pair)
 
 #datetime.utcfromtimestamp(timedelta(days=1)).strftime('%Y-%m-%d')
 #datetime.utcfromtimestamp(times[i]).strftime('%Y-%m-%d')

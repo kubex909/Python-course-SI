@@ -15,7 +15,6 @@ def get_data(start_date, currencypair):
     'period':period
     }
     BTC=requests.get(url, params= data).json()
-    print(BTC)
     data=[]
     time=[]
     for i in BTC:
@@ -45,7 +44,7 @@ def analyse_data(data):
     max_diff_lower+=1
     max_diff_up+=1   
     probabilty=lower/len(data)
-    print(probabilty)
+
     return min_diff_lower,max_diff_lower,min_diff_up,max_diff_up,probabilty
 
 def generate_data(data,min_diff_lower,max_diff_lower,min_diff_up,max_diff_up,probabilty):

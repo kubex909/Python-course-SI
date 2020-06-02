@@ -1,0 +1,6 @@
+1) Bli¿szy rzeczywistoœci okaza³ siê uœredniony wykres, dzieje siê tak, poniewa¿ model jest doœæ prosty i pojedyñcze wywo³anie symulacji generuje du¿e wachania wartoœci wolumenu,
+po uœrednieniu wielu symulacji powstaje bardziej zbli¿ony wykres.
+
+Dok³adnoœæ mierzê wartoœci¹ bezwzglêdn¹ z ró¿nicy realnej wartoœci do sprawdzanej wartoœci. W badaniu wysz³o mi ¿e w ka¿dym porównaniu tych wartoœci uœredniony wykres jest conajmniej tak samo dok³adny jak pojedynczy (153 do 0)
+
+2) Ze wzglêdu na prostotê modelu, im wiêkszy okres tym mniejsza dok³adnoœæ, ze wzglêdu na sposób wyznaczania kolejnej liczby, czyli losowanie z przedzia³u od najmniejszego spadku do najwiêkzego spadku (analogicznie dla wzrostu)

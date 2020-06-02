@@ -3,9 +3,9 @@ import requests
 from matplotlib.pyplot import *
 from datetime import datetime,timedelta
 
-def get_data(start_date, currencypair):
-    end = datetime.now().timestamp()
-    start= datetime.strptime(start_date, '%Y-%m-%d').timestamp()
+def get_data(start_date, currencypair, end_date):
+    start = datetime.strptime(start_date, '%Y-%m-%d').timestamp()
+    end= datetime.strptime(end_date, '%Y-%m-%d').timestamp()
     period=86400
     url="https://poloniex.com/public"
     data={'command':'returnChartData',
@@ -18,7 +18,6 @@ def get_data(start_date, currencypair):
     data=[]
     time=[]
     for i in BTC:
-        if i['volume']>0:
             data.append(i['volume'])
             time.append(i['date']) 
     return data,time
@@ -72,12 +71,14 @@ def select_cur():
 
         pair=switcher.get(idpair)
         print("Chose your starting data, more then 1 year before would take more time to show results")
-        start_date=input("Put date in format: YYYY-MM-DD \n")
+        #start_date=input("Put date in format: YYYY-MM-DD \n")
+        start_date="2019-01-01"
+        end_date="2019-06-01"
         if datetime.strptime(start_date, '%Y-%m-%d').timestamp() < datetime.now().timestamp():
             correct_data=True
         else:
             print("Enter historical data")
-    return start_date,pair
+    return start_date,pair,end_date
 
 def generate_time(times):
     time=[]
@@ -89,7 +90,7 @@ def generate_time(times):
         time2.append((datetime.now()+timedelta(days=i+1)).strftime('%y-%m-%d'))
     return time,time2
 
-def plots(time,old_data,time2):
+def plots(time,old_data,time2,real_data):
     average=[0]*(len(old_data)+1)
     min_diff_lower,max_diff_lower,min_diff_up,max_diff_up,probabilty =analyse_data(old_data)
     for i in range(100):
@@ -99,14 +100,32 @@ def plots(time,old_data,time2):
             average[i]+=new_data[i]
     for i in range(len(average)):
         average[i]=average[i]/100   
+    diference_with_1=[]
+    diference_with_100=[]
+    single_more=0
+    multiple_more=0
+    for i in range(len(average)):
+        diference_with_1.append(abs(real_data[i]-average[i]))
+        diference_with_100.append(abs(real_data[i]-new_data[i]))
+    for i in range(len(diference_with_1)):
+        if diference_with_1<diference_with_100:
+            single_more+=1
+        else:
+            multiple_more+=1
+    print(single_more,multiple_more)
     plot(time,old_data,'b')
     plot(time2,average,'r')
     plot(time2,new_data,'g')
+    plot(time2,real_data)
     show()    
+    plot(time2,diference_with_1,'b')
+    plot(time2,diference_with_100,'r')
+    show()
 
-start_data,pair=select_cur()
-old_data,times=get_data(start_data,pair)
+start_data,pair,end_data=select_cur()
+old_data,times=get_data(start_data,pair,end_data)
+real_data,tim=get_data(end_data,pair,"2019-10-31")
 time,time2=generate_time(times)
-plots(time,old_data,time2)
+plots(time,old_data,time2,real_data)
 
 
